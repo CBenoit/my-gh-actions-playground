@@ -3,6 +3,7 @@
   "plugins": ["cargo-workspace"],
   "release-type": "rust",
   "bump-minor-pre-major": true,
+  "separate-pull-requests": true,
   "packages": {
     "crates/publish-test-a-60e894818a": {
       "package-name": "a"
