@@ -2,7 +2,9 @@ pub fn add(a: u32, b: u32) -> u32 {
     a + b
 }
 
-pub fn super_function() {}
+pub fn super_function() -> &'static str {
+    "SUPER VALUE"
+}
 
 #[cfg(test)]
 mod tests {
