@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  formatting:
+    name: Check formatting
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check formatting
+        shell: pwsh
+        run: |
+          Write-Host "Check formatting"
+          cargo fmt --all -- --check
+
+          if ($LastExitCode -eq 1) {   
+            throw "Bad formatting, please run 'cargo +stable fmt --all'"
+          }
+
+  tests:
+    name: Tests
+    needs: formatting
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry/
+            ~/.cargo/git/
+            ./target/
+          key: ${{ runner.os }}-${{ github.job }}-${{ hashFiles('Cargo.lock') }}
+
+      - name: Run tests
+        run: cargo test --locked --verbose --workspace --all-features
+
+  lints:
+    name: Lints
+    runs-on: ubuntu-18.04
+    needs: formatting
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry/
+            ~/.cargo/git/
+            ./target/
+          key: ${{ runner.os }}-${{ github.job }}-${{ hashFiles('Cargo.lock') }}
+
+      - name: Run clippy
+        run: cargo clippy --locked --workspace --all-features -- -D warnings
+
+  publish:
+    name: Publish crates
+    runs-on: ubuntu-18.04
+    needs: [lints, tests]
+    environment: cratesio-push
+    if: ${{ github.ref == 'refs/heads/main' }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/bin/cargo-workspaces
+          key: binary-cargo-workspaces
+
+      - name: Install cargo-workspaces
+        shell: pwsh
+        run: |
+          if (-Not (Test-Path -Path ~/.cargo/bin/cargo-workspaces -PathType Leaf)) {
+            # Installed in debug because it's faster to compile and we don't need execution speed anyway
+            cargo install --debug --locked cargo-workspaces
+          }
+
+      - name: Run cargo workspaces publish
+        run: cargo workspaces publish --from-git --token "${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}" --yes
+
