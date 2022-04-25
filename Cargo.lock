@@ -4,11 +4,11 @@ version = 3
 
 [[package]]
 name = "publish-test-a-60e894818a"
-version = "0.3.0"
+version = "0.3.1"
 
 [[package]]
 name = "publish-test-b-4347e0f632"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "publish-test-a-60e894818a",
 ]
