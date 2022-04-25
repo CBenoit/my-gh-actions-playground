@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/CBenoit/my-gh-actions-playground/compare/b-v0.3.0...b-v0.4.0) (2022-04-25)
+
+
+### Features
+
+* super function 2 ([55bdf0b](https://github.com/CBenoit/my-gh-actions-playground/commit/55bdf0bc1893710cdcb2574e85f87e5887697976))
+
 ## [0.3.0](https://github.com/CBenoit/my-gh-actions-playground/compare/b-v0.2.0...b-v0.3.0) (2022-04-25)
 
 
