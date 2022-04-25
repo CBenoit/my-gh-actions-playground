@@ -9,6 +9,9 @@ on:
         default: false
         type: boolean
 
+env:
+  GITHUB_REPO: CBenoit/my-gh-actions-playground
+
 jobs:
   release-please:
     runs-on: ubuntu-18.04
@@ -25,7 +28,7 @@ jobs:
           $Args = @('--debug')
           $Args += @('release-pr')
           $Args += @('--token', '${{ github.token }}')
-          $Args += @('--repo-url', 'CBenoit/actions-tests')
+          $Args += @('--repo-url', $Env:GITHUB_REPO)
 
           if (-Not [string]::IsNullOrWhiteSpace("${{ github.event.inputs.dryRun }}"))
           {
@@ -44,7 +47,7 @@ jobs:
           $Args = @('--debug')
           $Args += @('github-release')
           $Args += @('--token', '${{ github.token }}')
-          $Args += @('--repo-url', 'CBenoit/actions-tests')
+          $Args += @('--repo-url', $Env:GITHUB_REPO)
 
           if (-Not [string]::IsNullOrWhiteSpace("${{ github.event.inputs.dryRun }}"))
           {
