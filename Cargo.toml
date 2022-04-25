@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/publish-test-a-60e894818a",
+  "crates/publish-test-b-4347e0f632"
+]
+default-members = [ "crates/publish-test-b-4347e0f632" ]
