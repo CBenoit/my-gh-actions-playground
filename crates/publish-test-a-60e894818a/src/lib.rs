@@ -2,6 +2,10 @@ pub fn minus(a: u32, b: u32) -> u32 {
     a - b
 }
 
+pub fn some_feature() -> ! {
+    loop {}
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
