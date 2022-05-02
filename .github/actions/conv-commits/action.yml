@@ -1,0 +1,52 @@
+name: Conventional Commit Checks
+description: Lint commits for current branch in a comment
+author: Devolutions Infrastructure Team
+
+inputs:
+  repo-name:
+    description: "The name of the repository. Example: 'octocat/hello-world'"
+    required: true
+    default: ${{ github.repository }}
+  pr-number:
+    description: The ID of the pull request (/ issue)
+    required: true
+    default: ${{ github.event.number }}
+  base-ref:
+    description: Base git ref when checking history
+    required: true
+    default: ${{ github.event.pull_request.base.sha }}
+  head-ref:
+    description: Head git ref when checking history
+    required: true
+    default: ${{ github.event.pull_request.head.sha }}
+  token:
+    required: true
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+
+  steps:
+    - name: Cache
+      if: ${{ github.event_name == 'pull_request' }}
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/bin/convco
+        key: binary-convco
+
+    - name: Install convco
+      if: ${{ github.event_name == 'pull_request' }}
+      shell: pwsh
+      run: |
+        if (-Not (Test-Path -Path ~/.cargo/bin/convco -PathType Leaf)) {
+          # Installed in debug because it's faster to compile and we don't need execution speed anyway
+          cargo +stable install --debug --locked convco
+        }
+
+    - name: Conventional Commits Linter
+      if: ${{ github.event_name == 'pull_request' }}
+      shell: pwsh
+      run: ${{ github.action_path }}/bot.ps1 -RepoName ${{ inputs.repo-name }} -PullRequestId ${{ inputs.pr-number }} -BaseRef ${{ inputs.base-ref }} -HeadRef ${{ inputs.head-ref }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+
