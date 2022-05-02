@@ -90,9 +90,16 @@ jobs:
         run: |
           if (-Not (Test-Path -Path ~/.cargo/bin/cargo-workspaces -PathType Leaf)) {
             # Installed in debug because it's faster to compile and we don't need execution speed anyway
-            cargo install --debug --locked cargo-workspaces
+            cargo +stable install --debug --locked cargo-workspaces
           }
 
       - name: Run cargo workspaces publish
-        run: cargo workspaces publish --from-git --token "${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}" --yes
+        run: cargo +stable workspaces publish --from-git --token "${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}" --yes
 
+  conv-commits:
+    name: Conventional Commits Lint
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/conv-commits
