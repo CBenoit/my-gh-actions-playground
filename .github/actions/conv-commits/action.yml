@@ -11,14 +11,10 @@ inputs:
     description: The ID of the pull request (/ issue)
     required: true
     default: ${{ github.event.number }}
-  base-ref:
-    description: Base git ref when checking history
+  branch:
+    description: Name of the branch
     required: true
-    default: ${{ github.event.pull_request.base.sha }}
-  head-ref:
-    description: Head git ref when checking history
-    required: true
-    default: ${{ github.event.pull_request.head.sha }}
+    default: ${{ github.event.pull_request.head.ref }}
   token:
     required: true
     default: ${{ github.token }}
@@ -45,8 +41,8 @@ runs:
 
     - name: Conventional Commits Linter
       if: ${{ github.event_name == 'pull_request' }}
-      shell: pwsh
-      run: ${{ github.action_path }}/bot.ps1 -RepoName ${{ inputs.repo-name }} -PullRequestId ${{ inputs.pr-number }} -BaseRef ${{ inputs.base-ref }} -HeadRef ${{ inputs.head-ref }}
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
+      shell: pwsh
+      run: ${{ github.action_path }}/bot.ps1 -RepoName ${{ inputs.repo-name }} -PullRequestId ${{ inputs.pr-number }} -Branch ${{ inputs.branch }}
 

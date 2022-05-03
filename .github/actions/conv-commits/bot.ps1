@@ -5,8 +5,8 @@ param(
     [string] $RepoName,
     [Parameter(Mandatory=$true)]
     [int] $PullRequestId,
-    [string] $BaseRef = "main",
-    [string] $HeadRef = "HEAD",
+    [Parameter(Mandatory=$true)]
+    [string] $Branch,
     [string] $Header = ":robot: **Conventional Commits Summary** :arrow_heading_down:",
     [string] $Message = "This repository adheres to the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/).",
     [string] $Footer = '[this comment will be updated automatically]'
@@ -42,6 +42,41 @@ function Invoke-Cmd
     $output
 }
 
+function Invoke-Convco
+{
+    param(
+        [Parameter(Mandatory=$true)]
+        [int] $PullRequestId
+    )
+
+    $headRefName = (Invoke-Cmd 'gh' @('pr', 'view', $PullRequestId, '--json', 'headRefName') | ConvertFrom-Json).headRefName
+    Write-Host "HEAD ref name is $headRefName"
+
+    $nbCommits = (Invoke-Cmd 'gh' @('pr', 'view', $PullRequestId, '--json', 'commits') | ConvertFrom-Json).commits.Length
+    Write-Host "$nbCommits commits to fetch for this PR"
+    
+    Invoke-Cmd 'git' @(
+        'fetch',
+        '--no-tags',
+        '--prune',
+        '--no-recurse-submodules',
+        '--depth', ($nbCommits + 1),
+        'origin'
+        "+refs/heads/${headRefName}:refs/temporary-convco"
+    ) | Out-Null
+
+    Invoke-Cmd 'git' @('checkout', 'refs/temporary-convco') | Out-Null
+
+    $nbPulled = Invoke-Cmd 'git' @('rev-list', '--count', 'HEAD')
+    Write-Host "We now have access to $nbPulled commits"
+
+    git log --format=oneline | Out-Host
+
+    Invoke-Cmd -Name 'convco' -Args @('check') -IgnoreFailure | Out-String
+
+    Invoke-Cmd 'git' ('update-ref', '-d', 'refs/temporary-convco') | Out-Null
+}
+
 function Get-Comments
 {
     param(
@@ -57,19 +92,6 @@ function Get-Comments
         "/repos/$RepoName/issues/$PullRequestId/comments"
     )
     Invoke-Cmd 'gh' $args | ConvertFrom-Json
-}
-
-function Fetch-History
-{
-    param(
-        [Parameter(Mandatory=$true)]
-        [int] $PullRequestId
-    )
-
-    $response = Invoke-Cmd 'gh' @('pr', 'view', $PullRequestId, '--json', 'commits') | ConvertFrom-Json
-    $nbCommits = $response.commits.Length
-    Write-Host "$nbCommits commits to fetch for this PR"
-    Invoke-Cmd 'git' @('fetch', '--no-tags', '--prune', '--progress', '--no-recurse-submodules', '--deepen', $nbCommits) | Out-Null
 }
 
 function Update-Status
@@ -106,11 +128,17 @@ function Update-Status
     Invoke-Cmd 'gh' $args | Out-Null
 }
 
-Fetch-History $PullRequestId
+$status = Invoke-Convco -PullRequestId $PullRequestId
+Write-Host $status
 
-$comments = Get-Comments `
-    -RepoName $RepoName `
-    -PullRequestId $PullRequestId
+if ($status.Contains('failed'))
+{
+    Write-Host "Detected some commits not adhering to the Conventional Commit specification"
+}
+
+Write-Host
+
+$comments = Get-Comments -RepoName $RepoName -PullRequestId $PullRequestId
 $filteredComments = $comments.Where(
     { $_.body.StartsWith($CommentHeader, "CurrentCultureIgnoreCase") },
     "First"
@@ -122,12 +150,7 @@ if ($comment -ne $null)
     Write-Host "Found already existing bot comment"
 }
 
-$status = Invoke-Cmd -Name 'convco' -Args @('check', "$BaseRef..$HeadRef") -IgnoreFailure | Out-String
-
-if ($status.Contains('failed'))
-{
-    Write-Host "Detected some commits not adhering to the Conventional Commit specification"
-}
+Write-Host
 
 if (($comment -ne $null) -or $status.Contains('failed'))
 {
