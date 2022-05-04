@@ -70,7 +70,7 @@ function Invoke-Convco
     $nbPulled = Invoke-Cmd 'git' @('rev-list', '--count', 'HEAD')
     Write-Host "We now have access to $nbPulled commits"
 
-    git log --format=oneline | Out-Host
+    git log --format=oneline --color | Out-Host
 
     Invoke-Cmd -Name 'convco' -Args @('check') -IgnoreFailure | Out-String
 
