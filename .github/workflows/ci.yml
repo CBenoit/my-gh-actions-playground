@@ -80,7 +80,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/crates-publish
         with:
-          token: ${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}
+          crates-io-token: ${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}
 
   conv-commits:
     name: Conventional Commits Lint

@@ -30,4 +30,4 @@ runs:
 
     - name: Do publish
       shell: pwsh
-      run: ${{ github.action_path }}/do-publish.ps1 -Path ${{ inputs.path }} -Token ${{ inputs.crates-io-token }}
+      run: ${{ github.action_path }}/do-publish.ps1 -Path "${{ inputs.path }}" -Token "${{ inputs.crates-io-token }}"

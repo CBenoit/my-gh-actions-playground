@@ -8,12 +8,18 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$MyInvocation.MyCommand.Parameters `
+    | Format-Table -AutoSize `
+        @{ Label = "Argument"; Expression = { $_.Key }; },
+        @{ Label = "Value"; Expression = { try { (Get-Variable -Name $_.Key).Value } catch { "" } }; }
+Write-Host
+
 Set-Location -Path "$Path"
 
 $Args = @('workspaces', 'publish')
 $Args = @('--from-git')
 $Args = @('--yes')
-$Args += @('--token', ${{ inputs.crates-io-token }})
+$Args += @('--token', $Token)
 Write-Host "Args: $Args"
 
 cargo +stable $Args
