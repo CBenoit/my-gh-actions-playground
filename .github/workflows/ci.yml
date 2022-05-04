@@ -81,12 +81,3 @@ jobs:
       - uses: ./.github/actions/crates-publish
         with:
           crates-io-token: ${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}
-
-  conv-commits:
-    name: Conventional Commits Lint
-    runs-on: ubuntu-18.04
-    if: ${{ github.event_name == 'pull_request' }}
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/conv-commits
