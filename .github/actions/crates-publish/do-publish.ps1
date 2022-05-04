@@ -15,6 +15,7 @@ $MyInvocation.MyCommand.Parameters `
 Write-Host
 
 Set-Location -Path "$Path"
+Write-Host "$(Get-Location)"
 
 $Args = @('workspaces', 'publish')
 $Args += @('--from-git')
