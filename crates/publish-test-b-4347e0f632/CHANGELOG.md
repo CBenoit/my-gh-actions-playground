@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.0](https://github.com/CBenoit/my-gh-actions-playground/compare/b-v0.4.0...b-v0.5.0) (2022-05-04)
+
+
+### Features
+
+* super function 3 ([f25d621](https://github.com/CBenoit/my-gh-actions-playground/commit/f25d621d1d16e9b8053cf7740a0f058e3dd13086))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * publish-test-a-60e894818a bumped from 0.3.1 to 0.3.2
+
 ## [0.4.0](https://github.com/CBenoit/my-gh-actions-playground/compare/b-v0.3.0...b-v0.4.0) (2022-04-25)
 
 

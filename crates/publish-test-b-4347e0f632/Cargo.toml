@@ -1,10 +1,10 @@
 [package]
 name = "publish-test-b-4347e0f632"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
 description = "Just trying crate publishing through CI"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/CBenoit/actions-tests"
 
 [dependencies]
-publish-test-a-60e894818a = { version = "0.3.1", path = "../publish-test-a-60e894818a" }
+publish-test-a-60e894818a = { version = "0.3.2", path = "../publish-test-a-60e894818a" }
