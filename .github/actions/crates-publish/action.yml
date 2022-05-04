@@ -1,0 +1,33 @@
+name: Crates publish
+description: Publish crates in order and skip if already published.
+author: Devolutions Infrastructure Team
+
+inputs:
+  path:
+    description: Run as if started in the given path
+    default: .
+  crates-io-token:
+    description: crates.io token
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Cache
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/bin/cargo-workspaces
+        key: binary-cargo-workspaces
+
+    - name: Install cargo-workspaces
+      shell: pwsh
+      run: |
+        if (-not (Test-Path -Path ~/.cargo/bin/cargo-workspaces -PathType Leaf)) {
+          # Installed in debug because it's faster to compile and we don't need execution speed anyway
+          cargo +stable install --debug --locked cargo-workspaces
+        }
+
+    - name: Do publish
+      shell: pwsh
+      run: ${{ github.action_path }}/do-publish.ps1 -Path ${{ inputs.path }} -Token ${{ inputs.crates-io-token }}

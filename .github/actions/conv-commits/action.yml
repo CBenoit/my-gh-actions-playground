@@ -5,18 +5,15 @@ author: Devolutions Infrastructure Team
 inputs:
   repo-name:
     description: "The name of the repository. Example: 'octocat/hello-world'"
-    required: true
     default: ${{ github.repository }}
   pr-number:
     description: The ID of the pull request (/ issue)
-    required: true
     default: ${{ github.event.number }}
   branch:
     description: Name of the branch
-    required: true
     default: ${{ github.event.pull_request.head.ref }}
   token:
-    required: true
+    description: GitHub token
     default: ${{ github.token }}
 
 runs:
@@ -24,14 +21,12 @@ runs:
 
   steps:
     - name: Cache
-      if: ${{ github.event_name == 'pull_request' }}
       uses: actions/cache@v3
       with:
         path: ~/.cargo/bin/convco
         key: binary-convco
 
     - name: Install convco
-      if: ${{ github.event_name == 'pull_request' }}
       shell: pwsh
       run: |
         if (-Not (Test-Path -Path ~/.cargo/bin/convco -PathType Leaf)) {
@@ -40,7 +35,6 @@ runs:
         }
 
     - name: Conventional Commits Linter
-      if: ${{ github.event_name == 'pull_request' }}
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
       shell: pwsh

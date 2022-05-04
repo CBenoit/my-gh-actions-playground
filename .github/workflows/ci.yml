@@ -78,27 +78,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Cache
-        uses: actions/cache@v3
+      - uses: ./.github/actions/crates-publish
         with:
-          path: ~/.cargo/bin/cargo-workspaces
-          key: binary-cargo-workspaces
-
-      - name: Install cargo-workspaces
-        shell: pwsh
-        run: |
-          if (-Not (Test-Path -Path ~/.cargo/bin/cargo-workspaces -PathType Leaf)) {
-            # Installed in debug because it's faster to compile and we don't need execution speed anyway
-            cargo +stable install --debug --locked cargo-workspaces
-          }
-
-      - name: Run cargo workspaces publish
-        run: cargo +stable workspaces publish --from-git --token "${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}" --yes
+          token: ${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}
 
   conv-commits:
     name: Conventional Commits Lint
     runs-on: ubuntu-18.04
+    if: ${{ github.event_name == 'pull_request' }}
 
     steps:
       - uses: actions/checkout@v3
