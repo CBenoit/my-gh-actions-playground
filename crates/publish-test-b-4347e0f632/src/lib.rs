@@ -14,6 +14,7 @@ pub fn super_function_3() -> &'static str {
     "SUPER VALUE"
 }
 
+#[deprecated]
 pub fn super_function_4() -> &'static str {
     "SUPER VALUE"
 }
