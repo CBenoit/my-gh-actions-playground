@@ -18,6 +18,10 @@ pub fn super_function_4() -> &'static str {
     "SUPER VALUE"
 }
 
+pub fn super_function_5() -> &'static str {
+    "SUPER VALUE"
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
