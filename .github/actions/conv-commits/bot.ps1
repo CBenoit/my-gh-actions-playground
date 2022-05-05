@@ -30,19 +30,22 @@ function Invoke-Cmd
         [switch] $IgnoreFailure
     )    
 
-    Write-Host "Invoke '${Name}' $($Args | Join-String -FormatString '''{0}''' -Separator ' ')"
-    $output = & $Name $Args
-    $failed = -not $?
+    Write-Host ">> Invoke '${Name}' $($Args | Join-String -FormatString '''{0}''' -Separator ' ')"
+
+    # Workaround: temporary change error action preferance because until v7.2 stderr redirection (>2) is redirected to the PowerShell error stream
+    $ErrorActionPreference = "Continue"
+    & $Name $Args 2>&1
+    $ErrorActionPreference = "Stop"
+
+    $failed = $LastExitCode -ne 0
 
     if ($failed -and (-not $IgnoreFailure))
     {
         throw "${Name} invocation failed"
     }
-
-    $output
 }
 
-function Invoke-Convco
+function Invoke-Cocogitto
 {
     param(
         [Parameter(Mandatory=$true)]
@@ -50,11 +53,11 @@ function Invoke-Convco
     )
 
     $headRefName = (Invoke-Cmd 'gh' @('pr', 'view', $PullRequestId, '--json', 'headRefName') | ConvertFrom-Json).headRefName
-    Write-Host "HEAD ref name is $headRefName"
+    Write-Host ">> HEAD ref name is $headRefName"
 
     $nbCommits = (Invoke-Cmd 'gh' @('pr', 'view', $PullRequestId, '--json', 'commits') | ConvertFrom-Json).commits.Length
-    Write-Host "$nbCommits commits to fetch for this PR"
-    
+    Write-Host ">> $nbCommits commits to fetch for this PR"
+
     Invoke-Cmd 'git' @(
         'fetch',
         '--no-tags',
@@ -62,19 +65,19 @@ function Invoke-Convco
         '--no-recurse-submodules',
         '--depth', ($nbCommits + 1),
         'origin'
-        "+refs/heads/${headRefName}:refs/temporary-convco"
-    ) | Out-Null
+        "+refs/heads/${headRefName}:refs/tmp-check-conv-commits"
+    ) | Out-Host
 
-    Invoke-Cmd 'git' @('checkout', 'refs/temporary-convco') | Out-Null
+    Invoke-Cmd 'git' @('checkout', 'refs/tmp-check-conv-commits') | Out-Host
 
     $nbPulled = Invoke-Cmd 'git' @('rev-list', '--count', 'HEAD')
-    Write-Host "We now have access to $nbPulled commits"
+    Write-Host ">> We now have access to $nbPulled commits"
 
     git log --format=oneline --color | Out-Host
 
-    Invoke-Cmd -Name 'convco' -Args @('check') -IgnoreFailure | Out-String
+    Invoke-Cmd -Name 'cog' -Args @('check') -IgnoreFailure | Out-String
 
-    Invoke-Cmd 'git' ('update-ref', '-d', 'refs/temporary-convco') | Out-Null
+    Invoke-Cmd 'git' ('update-ref', '-d', 'refs/tmp-check-conv-commits') | Out-Host
 }
 
 function Get-Comments
@@ -114,13 +117,13 @@ function Update-Status
 
     if ($Comment -eq $null)
     {
-        Write-Host 'Create new comment'
+        Write-Host '>> Create new comment'
         $args += @('--method', 'POST')
         $args += @("/repos/$RepoName/issues/$PullRequestId/comments")
     }
     else
     {
-        Write-Host 'Update existing comment'
+        Write-Host '>> Update existing comment'
         $args += @('--method', 'PATCH')
         $args += @("/repos/$RepoName/issues/comments/$($Comment.id)")
     }
@@ -128,12 +131,14 @@ function Update-Status
     Invoke-Cmd 'gh' $args | Out-Null
 }
 
-$status = Invoke-Convco -PullRequestId $PullRequestId
+$status = Invoke-Cocogitto -PullRequestId $PullRequestId
+Write-Host ">> Status:"
 Write-Host $status
+$errored = $status.Contains('Errored')
 
-if ($status.Contains('failed'))
+if ($errored)
 {
-    Write-Host "Detected some commits not adhering to the Conventional Commit specification"
+    Write-Host ">> Detected some commits not adhering to the Conventional Commit specification"
 }
 
 Write-Host
@@ -147,12 +152,12 @@ $comment = $filteredComments[0]
 
 if ($comment -ne $null)
 {
-    Write-Host "Found already existing bot comment"
+    Write-Host ">> Found already existing bot comment"
 }
 
 Write-Host
 
-if (($comment -ne $null) -or $status.Contains('failed'))
+if (($comment -ne $null) -or $errored)
 {
     $body = @(
         $Header,
@@ -160,8 +165,9 @@ if (($comment -ne $null) -or $status.Contains('failed'))
         $Message,
         '',
         '**Status**',
-        '',
+        '```',
         $status.Replace('"', '\"'),
+        '```',
         $Footer
     ) -Join "`n"
 

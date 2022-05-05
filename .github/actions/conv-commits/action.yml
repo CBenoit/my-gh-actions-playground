@@ -23,15 +23,15 @@ runs:
     - name: Cache
       uses: actions/cache@v3
       with:
-        path: ~/.cargo/bin/convco
-        key: binary-convco
+        path: ~/.cargo/bin/cog
+        key: binary-cocogitto
 
-    - name: Install convco
+    - name: Install cocogitto
       shell: pwsh
       run: |
-        if (-Not (Test-Path -Path ~/.cargo/bin/convco -PathType Leaf)) {
+        if (-Not (Test-Path -Path ~/.cargo/bin/cog -PathType Leaf)) {
           # Installed in debug because it's faster to compile and we don't need execution speed anyway
-          cargo +stable install --debug --locked convco
+          cargo +stable install --debug --locked --git https://github.com/CBenoit/cocogitto
         }
 
     - name: Conventional Commits Linter
