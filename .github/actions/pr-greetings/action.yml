@@ -17,7 +17,7 @@ inputs:
     default: ${{ github.token }}
   template:
     description: Message template
-    default: .github/pr_greetings.md
+    default: ${{ github.workspace }}/.github/pr_greetings.md
 
 runs:
   using: composite
