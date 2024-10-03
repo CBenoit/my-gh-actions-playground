@@ -1,0 +1,15 @@
+name: Conventional Commits Lints
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened ]
+
+jobs:
+  greet:
+    name: Greetings
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/pr-greetings
