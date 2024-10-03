@@ -8,7 +8,7 @@ param(
     [Parameter(Mandatory=$true)]
     [string] $Branch,
     [Parameter(Mandatory=$true)]
-    [string] $TemplatePath,
+    [string] $TemplatePath
 )
 
 $ErrorActionPreference = "Stop"

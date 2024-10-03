@@ -27,4 +27,4 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
       shell: pwsh
-      run: ${{ github.action_path }}/bot.ps1 -RepoName ${{ inputs.repo-name }} -PullRequestId ${{ inputs.pr-number }} -Branch ${{ inputs.branch }} -Template ${{ inputs.template }}
+      run: ${{ github.action_path }}/run.ps1 -RepoName ${{ inputs.repo-name }} -PullRequestId ${{ inputs.pr-number }} -Branch ${{ inputs.branch }} -Template ${{ inputs.template }}
