@@ -68,16 +68,3 @@ jobs:
 
       - name: Run clippy
         run: cargo clippy --locked --workspace --all-features -- -D warnings
-
-  publish:
-    name: Publish crates
-    runs-on: ubuntu-18.04
-    needs: [lints, tests]
-    environment: cratesio-push
-    if: ${{ github.ref == 'refs/heads/main' }}
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/crates-publish
-        with:
-          crates-io-token: ${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}
