@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # https://tera.netlify.app/docs/#introduction
 body = """
 {% if version -%}
-  ## [[{{ version | trim_start_matches(pat="v") }}]({%- if release_link -%}({{ release_link }}){% endif %})] - {{ timestamp | date(format="%Y-%m-%d") }}
+  ## [[{{ version | trim_start_matches(pat="v") }}]{%- if release_link -%}({{ release_link }}){% endif %}] - {{ timestamp | date(format="%Y-%m-%d") }}
 {%- else -%}
   ## [Unreleased]
 {%- endif %}
