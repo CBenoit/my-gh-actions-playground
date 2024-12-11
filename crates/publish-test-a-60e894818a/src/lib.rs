@@ -2,10 +2,6 @@ pub fn minus(a: u32, b: u32) -> u32 {
     a * b
 }
 
-pub fn new_shiny_feature() {
-    panic!("it’s a trap!");
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
