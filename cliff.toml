@@ -1,27 +1,22 @@
 # Configuration file for git-cliff
 
 [changelog]
+trim = false
 
-# changelog header
 header = """
 # Changelog
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-
-Also, this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
-and [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/).
-
-Minimal rustc version bumps happen only with minor number bumps in this project.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 """
 
-# template for the changelog body
 # https://tera.netlify.app/docs/#introduction
 body = """
 {% if version -%}
-  ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }} ({{ commit_id }})
+  ## [[{{ version | trim_start_matches(pat="v") }}]({%- if release_link -%}\ ({{ release_link }})\ {% endif %})] - {{ timestamp | date(format="%Y-%m-%d") }}
 {%- else -%}
   ## [Unreleased]
 {%- endif %}
@@ -32,49 +27,75 @@ body = """
 
 {%- for commit in commits %}
 
-- {% if commit.scope %}_{{ commit.scope }}_: {% endif %}{% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message | upper_first }} ({{ commit.id }}) \
+{%- if commit.scope %}
+  {%- set scope = "_" ~ commit.scope ~ "_: " %}
+  {%- set message = commit.message %}
+{%- else %}
+  {%- set scope = "" %}
+  {%- set message = commit.message | upper_first %}
+{%- endif %}
+
+{%- if commit.breaking %}
+  {%- set breaking = "[**breaking**] " %}
+{%- else %}
+  {%- set breaking = "" %}
+{%- endif %}
+
+{%- set short_sha = commit.id | truncate(length=10, end="") %}
+{%- set commit_url = "https://github.com/Devolutions/devolutions-gateway/commit/" ~ commit.id %}
+{%- set commit_link = "[" ~ short_sha ~ "](" ~ commit_url ~ ")" %}
+
+- {{ scope }}{{ breaking }}{{ message }} ({{commit_link}}) \
   {% if commit.body %}\n\n  {{ commit.body | replace(from="\n", to="\n  ") }}{% endif %}
 {%- endfor %}
 
 {% endfor -%}
 """
 
-# remove the leading and trailing whitespace from the template
-trim = false
-# changelog footer
 footer = ""
 
 [git]
-
-# parse the commits based on https://www.conventionalcommits.org
 conventional_commits = true
-# filter out the commits that are not conventional
-filter_unconventional = true
-# regex for preprocessing the commit messages
+filter_unconventional = false
+filter_commits = false
+date_order = false
+sort_commits = "oldest"
+
 commit_preprocessors = [
   # Replace issue number with the link
-  { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/Devolutions/picky/issues/${2}))"},
+  { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/CBenoit/my-gh-actions-playground/issues/${2}))"},
+  # Replace commit sha1 with the link
+  { pattern = '([a-f0-9]{10})([a-f0-9]{30})', replace = "[${0}](https://github.com/CBenoit/my-gh-actions-playground/commit/${1}${2})" }
 ]
+
 # regex for parsing and grouping commits
+# <!-- <NUMBER> --> is a trick to control the section order: https://github.com/orhun/git-cliff/issues/9#issuecomment-914521594
 commit_parsers = [
-    { message = "^build", skip = true },
-    { message = "^chore", skip = true },
-    { message = "^ci", skip = true },
-    { message = "^style", skip = true },
-    { message = "^refactor", skip = true },
+  { message = "^chore", skip = true },
+  { message = "^style", skip = true },
+  { message = "^refactor", skip = true },
+  { message = "^test", skip = true },
+  { message = "^ci", skip = true },
+  { message = "^chore\\(release\\): prepare for", skip = true },
+  { message = "^chore\\(deps\\)", skip = true },
+  { message = "^build\\(deps\\)", skip = true },
+  { footer = "^[Cc]hangelog: ?ignore", skip = true },
 
-    { message = "(?i)security", group = "Security" },
-    { body = "(?i)security", group = "Security" },
+  { message = "(?i)security", group = "<!-- 0 -->Security" },
+  { body = "(?i)security", group = "<!-- 0 -->Security" },
+  { footer = "^[Ss]ecurity: ?yes", group = "<!-- 0 -->Security" },
 
-    { message = "^feat", group = "Features" },
-    { message = "^fix", group = "Bug Fixes" },
-    { message = "^doc", group = "Documentation" },
-    { message = "^perf", group = "Performance" },
-    { message = "^test", group = "Testing" },
+  { message = "^feat", group = "<!-- 1 -->Features" },
+
+  { message = "^revert", group = "<!-- 3 -->Revert" },
+  { message = "^fix", group = "<!-- 4 -->Bug Fixes" },
+  { message = "^perf", group = "<!-- 5 -->Performance" },
+  { message = "^doc", group = "<!-- 6 -->Documentation" },
+  { message = "^build", group = "<!-- 7 -->Build" },
+
+  { message = "(?i)improve", group = "<!-- 2 -->Improvements" },
+  { message = "(?i)adjust", group = "<!-- 2 -->Improvements" },
+  { message = "(?i)change", group = "<!-- 2 -->Improvements" },
+
+  { message = ".*", group = "<!-- 99 -->Please Sort" },
 ]
-# filter out the commits that are not matched by commit parsers
-filter_commits = false
-# sort the tags chronologically
-date_order = false
-# sort the commits inside sections by oldest/newest order
-sort_commits = "oldest"
