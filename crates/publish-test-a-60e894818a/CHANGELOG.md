@@ -9,6 +9,25 @@ and [Conventional Commits specification](https://www.conventionalcommits.org/en/
 
 Minimal rustc version bumps happen only with minor number bumps in this project.
 
+## [0.4.0](https://github.com/CBenoit/my-gh-actions-playground/compare/publish-test-a-60e894818a-v0.3.1...publish-test-a-60e894818a-v0.4.0) - 2024-12-11
+
+### Added
+
+- new shiny feature
+- [**breaking**] `minus` is now performing a multiplication
+
+### Fixed
+
+- some security patch
+- something
+- remove bug
+- add a bug
+
+### Other
+
+- update changelogs
+- release main
+
 ## [0.3.1] - 2022-04-25 (899b572415dfb38442026a9f5934384a21ce8e8b)
 
 ### Bug Fixes
