@@ -46,4 +46,4 @@ jobs:
         uses: ./.github/actions/release-plz
         with:
           command: release
-          registry_token: ${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}
+          registry-token: ${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}
