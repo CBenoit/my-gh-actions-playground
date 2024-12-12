@@ -53,14 +53,14 @@ runs:
     - name: Install cargo-semver-checks
       shell: bash
       run: |
-        curl "https://github.com/obi1kenobi/cargo-semver-checks/releases/download/v${{ inputs.cargo-semver-checks-version }}/cargo-semver-checks-x86_64-unknown-linux-gnu.tar.gz" --output cargo-semver-checks.tar.gz --location 
-        tar -xzvf cargo-semver-checks.tar.gz -C "$HOME/.local/bin" cargo-semver-checks
+        curl "https://github.com/obi1kenobi/cargo-semver-checks/releases/download/v${{ inputs.cargo-semver-checks-version }}/cargo-semver-checks-x86_64-unknown-linux-gnu.tar.gz" --output /tmp/cargo-semver-checks.tar.gz --location 
+        tar -xzvf /tmp/cargo-semver-checks.tar.gz -C "$HOME/.local/bin" cargo-semver-checks
 
     - name: Install release-plz
       shell: bash
       run: |
-        curl "https://github.com/release-plz/release-plz/releases/download/release-plz-v${{ inputs.release-plz-version }}/release-plz-x86_64-unknown-linux-gnu.tar.gz" --output release-plz.tar.gz --location
-        tar -xzvf release-plz.tar.gz -C "$HOME/.local/bin" release-plz
+        curl "https://github.com/release-plz/release-plz/releases/download/release-plz-v${{ inputs.release-plz-version }}/release-plz-x86_64-unknown-linux-gnu.tar.gz" --output /tmp/release-plz.tar.gz --location
+        tar -xzvf /tmp/release-plz.tar.gz -C "$HOME/.local/bin" release-plz
 
     - name: Configure Git user
       shell: bash
