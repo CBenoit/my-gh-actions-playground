@@ -51,16 +51,19 @@ runs:
         echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
     - name: Install cargo-semver-checks
+      shell: bash
       run: |
         curl "https://github.com/obi1kenobi/cargo-semver-checks/releases/download/v${{ inputs.cargo_semver_checks_version }}/cargo-semver-checks-x86_64-unknown-linux-gnu.tar.gz" --output cargo-semver-checks.tar.gz --location 
         tar -xzvf cargo-semver-checks.tar.gz -C "$HOME/.local/bin" cargo-semver-checks
 
     - name: Install release-plz
+      shell: bash
       run: |
         curl "https://github.com/release-plz/release-plz/releases/download/release-plz-v${{ inputs.release_plz_version }}/release-plz-x86_64-unknown-linux-gnu.tar.gz" --output release-plz.tar.gz --location
         tar -xzvf release-plz.tar.gz -C "$HOME/.local/bin" release-plz
 
     - name: Configure Git user
+      shell: bash
       run: |
         git config --global user.name "${{ inputs.git-name }}"
         git config --global user.email "${{ inputs.git-email }}"
