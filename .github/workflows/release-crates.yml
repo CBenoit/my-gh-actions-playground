@@ -26,9 +26,14 @@ jobs:
           fetch-depth: 512
 
       - name: Run release-plz
+        id: release-plz
         uses: ./.github/actions/release-plz
         with:
           command: release-pr
+
+      - run: |
+          echo "pr: ${{ steps.release-plz.outputs.pr }}"
+          echo "did-open-pr: ${{ steps.release-plz.outputs.did-open-pr }}"
 
   # Release unpublished packages.
   release-plz-release:
@@ -43,7 +48,11 @@ jobs:
           fetch-depth: 512
 
       - name: Run release-plz
+        id: release-plz
         uses: ./.github/actions/release-plz
         with:
           command: release
           registry-token: ${{ secrets.CRATES_IO_DEVOLUTIONSBOT_API_KEY }}
+
+      - run: |
+          echo "did-publish: ${{ steps.release-plz.outputs.did-publish }}"

@@ -41,6 +41,9 @@ inputs:
     required: false
 
 outputs:
+  pr:
+    description: The release PR opened by release-plz
+    value: ${{ steps.release-plz.outputs.pr }}
   did-open-pr:
     description: Whether release-plz created at least one release PR
     value: ${{ steps.release-plz.outputs.did-open-pr }}
@@ -119,11 +122,14 @@ runs:
 
             if [ "$pr_count" != "0" ]; then
                 did_open_pr=true
+                first_pr=$(echo $prs | jq -c .[0])
             else
                 did_open_pr=false
+                first_pr="{}"
             fi
 
             echo "did-open-pr=$did_open_pr" >> "$GITHUB_OUTPUT"
+            echo "pr=$first_pr" >> "$GITHUB_OUTPUT"
         elif [[ "${{ inputs.command }}" == "release" ]]; then
             echo "Run release-plz release"
 
