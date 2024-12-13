@@ -9,7 +9,7 @@ branding:
 inputs:
   command:
     description: The release-plz command to run
-    required: false
+    required: true
   config:
     description: Config file location. If not present, the default 'release-plz.toml' is used
     required: false
@@ -17,7 +17,7 @@ inputs:
     description: Path to the Cargo.toml of the project to update
     required: false
   release-plz-version:
-    description: Release-plz version to use
+    description: release-plz version to use
     default: 0.3.111
     required: false
   cargo-semver-checks-version:
@@ -33,12 +33,20 @@ inputs:
     required: false
   git-name:
     description: Git author name
-    default: ${{ github.token }}
+    default: github-actions
     required: false
   git-email:
     description: Git author email
-    default: ${{ github.token }}
+    default: github-actions@github.com
     required: false
+
+outputs:
+  did-open-pr:
+    description: Whether release-plz created at least one release PR
+    value: ${{ steps.release-plz.outputs.did-open-pr }}
+  did-publish:
+    description: Whether release-plz released at least one package
+    value: ${{ steps.release-plz.outputs.did-publish }}
 
 runs:
   using: composite
@@ -69,10 +77,10 @@ runs:
         git config --global user.email "${{ inputs.git-email }}"
 
     - name: Run release-plz
+      id: release-plz
       shell: bash
       run: |
-        if [[ -n "${{ inputs.config }}" ]]
-        then
+        if [[ -n "${{ inputs.config }}" ]]; then
             echo "using config from '${{ inputs.config }}'"
             # Use arrays so that inputs can contain spaces
             CONFIG_PATH=("--config" "${{ inputs.config }}")
@@ -80,40 +88,62 @@ runs:
             CONFIG_PATH=()
         fi
 
-        if [[ -n "${{ inputs.registry-token }}" ]]
-        then
+        if [[ -n "${{ inputs.registry-token }}" ]]; then
             echo "Custom registry token"
             TOKEN=("--token" "${{ inputs.registry-token }}")
         else
             TOKEN=()
         fi
 
-        if [[ -n "${{ inputs.manifest-path }}" ]]
-        then
+        if [[ -n "${{ inputs.manifest-path }}" ]]; then
             echo "Manifest path '${{ inputs.manifest-path }}'"
             MANIFEST_PATH=("--manifest-path" "${{ inputs.manifest-path }}")
         else
             MANIFEST_PATH=()
         fi
 
-        if [[ "${{ inputs.command }}" == "release-pr" ]]
-        then
+        if [[ "${{ inputs.command }}" == "release-pr" ]]; then
             echo "Run release-plz release-pr"
 
-            release-plz release-pr \
+            output=$(release-plz release-pr \
                 --git-token "${{ inputs.github-token }}" \
                 --repo-url "https://github.com/${GITHUB_REPOSITORY}" \
                 "${CONFIG_PATH[@]}" \
-                "${MANIFEST_PATH[@]}"
-        fi
+                "${MANIFEST_PATH[@]}" \
+                --output json)
 
-        if [[ "${{ inputs.command }}" == "release" ]]
-        then
+            echo "Output: $output"
+
+            prs=$(echo "$output" | jq -c .prs)
+            pr_count=$(echo "$prs" | jq 'length')
+
+            if [ "$pr_count" != "0" ]; then
+                did_open_pr=true
+            else
+                did_open_pr=false
+            fi
+
+            echo "did-open-pr=$did_open_pr" >> "$GITHUB_OUTPUT"
+        elif [[ "${{ inputs.command }}" == "release" ]]; then
             echo "Run release-plz release"
 
-            release-plz release \
+            output=$(release-plz release \
                 --git-token "${{ inputs.github-token }}" \
                 "${CONFIG_PATH[@]}" \
                 "${MANIFEST_PATH[@]}" \
-                "${TOKEN[@]}"
+                "${TOKEN[@]}" \
+                --output json)
+
+            echo "Output: $output"
+
+            releases=$(echo "$output" | jq -c .releases)
+            release_count=$(echo "$releases" | jq 'length')
+
+            if [ "$release_count" != "0" ]; then
+                did_publish=true
+            else
+                did_publish=false
+            fi
+
+            echo "did-publish=$did_publish" >> "$GITHUB_OUTPUT"
         fi
