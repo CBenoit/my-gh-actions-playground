@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+
 ## [[0.6.0](https://github.com/CBenoit/my-gh-actions-playground/compare/publish-test-b-4347e0f632-v0.5.0...publish-test-b-4347e0f632-v0.6.0)] - 2024-12-11
 
 ### <!-- 4 -->Bug Fixes
