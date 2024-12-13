@@ -3,7 +3,7 @@ pub fn minus(a: u32, b: u32) -> u32 {
 }
 
 pub fn new_super_feature() -> u32 {
-    42
+    42 * 42
 }
 
 #[cfg(test)]
