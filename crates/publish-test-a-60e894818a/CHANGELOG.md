@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [[0.5.2](https://github.com/CBenoit/my-gh-actions-playground/compare/publish-test-a-60e894818a-v0.5.1...publish-test-a-60e894818a-v0.5.2)] - 2024-12-13
+
+### <!-- 4 -->Bug Fixes
+
+- Fixed something in new_super_feature ([42b3e0b308](https://github.com/Devolutions/devolutions-gateway/commit/42b3e0b3088a74b8869d3efd2f7488e2fff4cba5)) 
+
+
+
 ## [[0.5.1](https://github.com/CBenoit/my-gh-actions-playground/compare/publish-test-a-60e894818a-v0.5.0...publish-test-a-60e894818a-v0.5.1)] - 2024-12-12
 
 ### <!-- 1 -->Features
